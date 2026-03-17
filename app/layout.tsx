@@ -7,9 +7,10 @@ import {
   Show,
   SignInButton,
   SignUpButton,
-  SignOutButton,
-} from "@clerk/nextjs";
 
+} from "@clerk/nextjs";
+import { Button } from "@/components/ui/button";
+import UserDropdown from "@/components/user-dropdown";
 import "./globals.css";
 import { cn } from "@/lib/utils";
 
@@ -44,14 +45,18 @@ export default function RootLayout({
               NextCash
             </Link>
 
-            <div className="flex gap-4">
+            <div className="flex gap-4 items-center">
               <Show when="signed-out">
-                <SignInButton />
-                <SignUpButton />
+                <Button asChild variant={"link"} className="text-white">
+                  <SignInButton />
+                </Button>
+                <Button asChild variant={"link"} className="text-white">
+                  <SignUpButton />
+                </Button>
               </Show>
 
               <Show when="signed-in">
-                <SignOutButton />
+                <UserDropdown />
               </Show>
             </div>
           </nav>
