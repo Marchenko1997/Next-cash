@@ -25,8 +25,9 @@ import { CalendarIcon } from "lucide-react";
 import { Calendar } from "./ui/calendar";
 import { format } from "date-fns";
 import { Input } from "./ui/input";
+import type { Category } from "@/types/Category";
 
-const TransactionForm = () => {
+const TransactionForm = ({categories, onSubmit} :  {categories: Category[], onSubmit: (data: z.input<typeof transactionFormSchema>) => Promise<void>}) => {
   const form = useForm<z.input<typeof transactionFormSchema>>({
     resolver: zodResolver(transactionFormSchema),
     defaultValues: {
@@ -40,7 +41,10 @@ const TransactionForm = () => {
 
   const handleSubmit = async (
     data: z.input<typeof transactionFormSchema>,
-  ) => {};
+  ) => { await onSubmit(data) };
+  
+  const transactionType = form.watch("transactionType");
+  const filteredCategories = categories.filter((category) => category.type === transactionType);
 
   return (
     <Form {...form}>
@@ -54,7 +58,13 @@ const TransactionForm = () => {
                 <FormItem>
                   <FormLabel>Transaction Type</FormLabel>
                   <FormControl>
-                    <Select onValueChange={field.onChange} value={field.value}>
+                    <Select
+                      onValueChange={(newValue) => {
+                        field.onChange(newValue);
+                        form.setValue("categoryId", 0);
+                      }}
+                      value={field.value}
+                    >
                       <SelectTrigger className="w-full">
                         <SelectValue />
                       </SelectTrigger>
@@ -84,7 +94,13 @@ const TransactionForm = () => {
                       <SelectTrigger className="w-full">
                         <SelectValue />
                       </SelectTrigger>
-                      <SelectContent></SelectContent>
+                      <SelectContent>
+                        {filteredCategories.map((category) => (
+                          <SelectItem key={category.id} value={String(category.id)}>
+                            {category.name}
+                          </SelectItem>
+                        ))}
+                      </SelectContent>
                     </Select>
                   </FormControl>
                   <FormMessage />
