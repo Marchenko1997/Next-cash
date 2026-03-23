@@ -13,6 +13,7 @@ import { Button } from "@/components/ui/button";
 import UserDropdown from "@/components/user-dropdown";
 import "./globals.css";
 import { cn } from "@/lib/utils";
+import { Toaster } from "sonner";
 
 const geist = Geist({subsets:['latin'],variable:'--font-sans'});
 
@@ -62,6 +63,7 @@ export default function RootLayout({
           </nav>
 
           {children}
+          <Toaster richColors />
         </ClerkProvider>
       </body>
     </html>

@@ -27,7 +27,12 @@ import { format } from "date-fns";
 import { Input } from "./ui/input";
 import type { Category } from "@/types/Category";
 
-const TransactionForm = ({categories, onSubmit} :  {categories: Category[], onSubmit: (data: z.input<typeof transactionFormSchema>) => Promise<void>}) => {
+type Props = {
+  categories: Category[];
+  onSubmit: (data: z.input<typeof transactionFormSchema>) => Promise<void>;
+};
+
+const TransactionForm = ({ categories, onSubmit }: Props) => {
   const form = useForm<z.input<typeof transactionFormSchema>>({
     resolver: zodResolver(transactionFormSchema),
     defaultValues: {
@@ -39,17 +44,18 @@ const TransactionForm = ({categories, onSubmit} :  {categories: Category[], onSu
     },
   });
 
-  const handleSubmit = async (
-    data: z.input<typeof transactionFormSchema>,
-  ) => { await onSubmit(data) };
-  
   const transactionType = form.watch("transactionType");
-  const filteredCategories = categories.filter((category) => category.type === transactionType);
+  const fileteredCategories = categories.filter(
+    (category) => category.type === transactionType,
+  );
 
   return (
     <Form {...form}>
-      <form onSubmit={form.handleSubmit(handleSubmit)}>
-        <fieldset className="grid grid-cols-2 gap-y-5 gap-x-2">
+      <form onSubmit={form.handleSubmit((data) => onSubmit(data))}>
+        <fieldset
+          disabled={form.formState.isSubmitting}
+          className="grid grid-cols-2 gap-y-5 gap-x-2"
+        >
           <FormField
             control={form.control}
             name="transactionType"
@@ -95,8 +101,11 @@ const TransactionForm = ({categories, onSubmit} :  {categories: Category[], onSu
                         <SelectValue />
                       </SelectTrigger>
                       <SelectContent>
-                        {filteredCategories.map((category) => (
-                          <SelectItem key={category.id} value={String(category.id)}>
+                        {fileteredCategories.map((category) => (
+                          <SelectItem
+                            key={category.id}
+                            value={String(category.id)}
+                          >
                             {category.name}
                           </SelectItem>
                         ))}
@@ -174,7 +183,10 @@ const TransactionForm = ({categories, onSubmit} :  {categories: Category[], onSu
             }}
           />
         </fieldset>
-        <fieldset className="mt-5 flex flex-col gap-y-5">
+        <fieldset
+          disabled={form.formState.isSubmitting}
+          className="mt-5 flex flex-col gap-y-5"
+        >
           <FormField
             control={form.control}
             name="description"
