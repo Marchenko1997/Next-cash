@@ -6,6 +6,8 @@ import type { Category } from "@/types/Category";
 import { toast } from "sonner";
 import z from "zod";
 import { useRouter } from "next/navigation";
+import { updateTransaction } from "./actions";
+import { format } from "date-fns";
 
 
 type Props = {
@@ -23,7 +25,21 @@ const EditTransactionForm = ({ categories, transaction }: Props) => {
   const router = useRouter();
 
   const handleSubmit = async (data: z.input<typeof transactionFormSchema>) => {
-    const result = {};
+     const result = await updateTransaction({
+       id: transaction.id,
+       amount: Number(data.amount),
+       description: data.description,
+       transactionDate: format(
+         new Date(data.transactionDate as string),
+         "yyyy-MM-dd",
+       ),
+       categoryId: Number(data.categoryId),
+     });
+
+     if (result?.error) {
+       toast.error(result?.message);
+       return;
+     }
 
     toast.success("Transaction updated successfully");
     router.push(

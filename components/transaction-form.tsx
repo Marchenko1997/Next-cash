@@ -40,10 +40,6 @@ type Props = {
 };
 
 const TransactionForm = ({ categories, onSubmit, defaultValues }: Props) => {
-
-    console.log("TransactionForm - defaultValues:", defaultValues);
-    console.log("TransactionForm - categories:", categories);
-  console.log("TransactionForm component is rendering!");
   
   const form = useForm<z.input<typeof transactionFormSchema>>({
     resolver: zodResolver(transactionFormSchema),
@@ -65,9 +61,9 @@ const TransactionForm = ({ categories, onSubmit, defaultValues }: Props) => {
   });
 
   const transactionType = form.watch("transactionType");
-  const fileteredCategories = categories.filter(
-    (category) => category.type === transactionType,
-  );
+const fileteredCategories = categories.filter(
+  (category) => category.type?.toLowerCase() === transactionType,
+);
 
   return (
     <Form {...form}>
@@ -118,7 +114,7 @@ const TransactionForm = ({ categories, onSubmit, defaultValues }: Props) => {
                       value={String(field.value)}
                     >
                       <SelectTrigger className="w-full">
-                        <SelectValue />
+                        <SelectValue placeholder="Select a category" />
                       </SelectTrigger>
                       <SelectContent>
                         {fileteredCategories.map((category) => (

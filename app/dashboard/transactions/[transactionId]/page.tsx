@@ -12,6 +12,7 @@ import { getCategories } from "@/data/getCategories";
 import EditTransactionForm from "./edit-transaction-form";
 import { getTransaction } from "@/data/getTransaction";
 import { notFound } from "next/navigation";
+import DeleteTransactionDialog from "./delete-transaction-dialog";
 
 const EditTransactionPage = async ({
   params,
@@ -28,9 +29,6 @@ const EditTransactionPage = async ({
   const categories = await getCategories();
   const transaction = await getTransaction(transactionId);
 
-  console.log("PAGE - Transaction ID:", transactionId);
-  console.log("PAGE - Transaction data:", transaction);
-  console.log("PAGE - Categories:", categories);
 
   if (!transaction) {
     notFound();
@@ -59,7 +57,13 @@ const EditTransactionPage = async ({
       </Breadcrumb>
       <Card className="mt-4 max-w-screen-md">
         <CardHeader>
-          <CardTitle>Edit Transaction</CardTitle>
+          <CardTitle className="flex justify-between">
+            <span>Edit Transaction</span>
+            <DeleteTransactionDialog
+              transactionId={transactionId}
+              transactionDate={transaction.transactionDate}
+            />
+          </CardTitle>
         </CardHeader>
         <CardContent>
           <EditTransactionForm
