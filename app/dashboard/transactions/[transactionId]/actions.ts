@@ -1,11 +1,11 @@
 "use server";
 
 import { auth } from "@clerk/nextjs/server";
+import { transactionSchema } from "@/validation/transactionSchema";
 import z from "zod";
 import db from "@/db";
 import { transactionsTable } from "@/db/schema";
 import { and, eq } from "drizzle-orm";
-import { transactionSchema } from "@/validation/transactionSchema";
 
 const updateTransactionSchema = transactionSchema.and(
   z.object({
@@ -47,6 +47,24 @@ export const updateTransaction = async (data: Props) => {
     .where(
       and(
         eq(transactionsTable.id, data.id),
+        eq(transactionsTable.userId, userId),
+      ),
+    );
+};
+
+export const deleteTransaction = async (transactionId: number) => {
+  const { userId } = await auth();
+  if (!userId)
+    return {
+      error: true,
+      message: "Unauthorized",
+    };
+
+  await db
+    .delete(transactionsTable)
+    .where(
+      and(
+        eq(transactionsTable.id, transactionId),
         eq(transactionsTable.userId, userId),
       ),
     );
