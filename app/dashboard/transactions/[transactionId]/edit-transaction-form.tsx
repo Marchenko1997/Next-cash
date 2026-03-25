@@ -22,7 +22,7 @@ type Props = {
 };
 
 const EditTransactionForm = ({ categories, transaction }: Props) => {
-  const router = useRouter();
+ const router: ReturnType<typeof useRouter> = useRouter();
 
   const handleSubmit = async (data: z.input<typeof transactionFormSchema>) => {
      const result = await updateTransaction({
