@@ -17,7 +17,7 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
-import { getTransactionsMyMonth } from "@/data/getTransactionsByMonth";
+import { getTransactionsByMonth } from "@/data/getTransactionsByMonth";
 import { format } from "date-fns";
 import { PencilIcon } from "lucide-react";
 import Link from "next/link";
@@ -49,7 +49,7 @@ const TransactionsPage = async ({ searchParams }: Props) => {
   const searchParamsValues = await searchParams;
   const { year, month } = searchSchema.parse(searchParamsValues);
   const selectedDate = new Date(year, month - 1, 1);
-  const transactions = await getTransactionsMyMonth({ month, year });
+  const transactions = await getTransactionsByMonth({ month, year });
   const yearsRange = await getTransactionsYearsRange();
   return (
     <div className="max-w-screen-xl mx-auto py-10">

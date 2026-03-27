@@ -7,7 +7,7 @@ import { toast } from "sonner";
 import z from "zod";
 import { useRouter } from "next/navigation";
 import { updateTransaction } from "./actions";
-import { format } from "date-fns";
+import { getDateParts } from "@/lib/date-only";
 
 
 type Props = {
@@ -22,36 +22,32 @@ type Props = {
 };
 
 const EditTransactionForm = ({ categories, transaction }: Props) => {
- const router: ReturnType<typeof useRouter> = useRouter();
+  const router: ReturnType<typeof useRouter> = useRouter();
 
   const handleSubmit = async (data: z.input<typeof transactionFormSchema>) => {
-     const result = await updateTransaction({
-       id: transaction.id,
-       amount: Number(data.amount),
-       description: data.description,
-       transactionDate: format(
-         new Date(data.transactionDate as string),
-         "yyyy-MM-dd",
-       ),
-       categoryId: Number(data.categoryId),
-     });
+    const result = await updateTransaction({
+      id: transaction.id,
+      amount: Number(data.amount),
+      description: data.description,
+      transactionDate: data.transactionDate,
+      categoryId: Number(data.categoryId),
+    });
 
-     if (result?.error) {
-       toast.error(result?.message);
-       return;
-     }
+    if (result.error) {
+      toast.error(result.message);
+      return;
+    }
 
+    const { month, year } = getDateParts(data.transactionDate);
     toast.success("Transaction updated successfully");
-    router.push(
-      `/dashboard/transactions?month=${new Date(data.transactionDate as string).getMonth() + 1}&year=${new Date(data.transactionDate as string).getFullYear()}`,
-    );
+    router.push(`/dashboard/transactions?month=${month}&year=${year}`);
   };
 
   const defaultValues = {
     amount: Number(transaction.amount),
     categoryId: transaction.categoryId,
     description: transaction.description,
-    transactionDate: new Date(transaction.transactionDate),
+    transactionDate: transaction.transactionDate,
     transactionType:
       categories.find((category) => category.id === transaction.categoryId)
         ?.type || "income",

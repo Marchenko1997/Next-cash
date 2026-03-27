@@ -1,6 +1,6 @@
 "use client";
 
-import { useForm } from "react-hook-form";
+import { useForm, useWatch } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
 import { transactionFormSchema } from "@/schemas/transactionFormSchema";
@@ -26,6 +26,7 @@ import { Calendar } from "./ui/calendar";
 import { format } from "date-fns";
 import { Input } from "./ui/input";
 import type { Category } from "@/types/Category";
+import { formatDateOnly, parseDateOnly } from "@/lib/date-only";
 
 type Props = {
   categories: Category[];
@@ -34,13 +35,12 @@ type Props = {
     amount: number;
     categoryId: number;
     description: string;
-    transactionDate: Date;
+    transactionDate: string;
     transactionType: "income" | "expense";
   };
 };
 
 const TransactionForm = ({ categories, onSubmit, defaultValues }: Props) => {
-  
   const form = useForm<z.input<typeof transactionFormSchema>>({
     resolver: zodResolver(transactionFormSchema),
     defaultValues: defaultValues
@@ -48,22 +48,25 @@ const TransactionForm = ({ categories, onSubmit, defaultValues }: Props) => {
           amount: defaultValues.amount.toString(),
           categoryId: defaultValues.categoryId.toString(),
           description: defaultValues.description,
-          transactionDate: defaultValues.transactionDate.toISOString(),
+          transactionDate: defaultValues.transactionDate,
           transactionType: defaultValues.transactionType,
         }
       : {
-          amount: "0",
-          categoryId: "0",
+          amount: "",
+          categoryId: "",
           description: "",
-          transactionDate: new Date().toISOString(),
+          transactionDate: formatDateOnly(new Date()),
           transactionType: "income",
         },
   });
 
-  const transactionType = form.watch("transactionType");
-const fileteredCategories = categories.filter(
-  (category) => category.type?.toLowerCase() === transactionType,
-);
+  const transactionType = useWatch({
+    control: form.control,
+    name: "transactionType",
+  });
+  const filteredCategories = categories.filter(
+    (category) => category.type?.toLowerCase() === transactionType,
+  );
 
   return (
     <Form {...form}>
@@ -83,7 +86,7 @@ const fileteredCategories = categories.filter(
                     <Select
                       onValueChange={(newValue) => {
                         field.onChange(newValue);
-                        form.setValue("categoryId", 0);
+                        form.setValue("categoryId", "0");
                       }}
                       value={field.value}
                     >
@@ -104,6 +107,7 @@ const fileteredCategories = categories.filter(
           <FormField
             control={form.control}
             name="categoryId"
+          
             render={({ field }) => {
               return (
                 <FormItem>
@@ -117,7 +121,7 @@ const fileteredCategories = categories.filter(
                         <SelectValue placeholder="Select a category" />
                       </SelectTrigger>
                       <SelectContent>
-                        {fileteredCategories.map((category) => (
+                        {filteredCategories.map((category) => (
                           <SelectItem
                             key={category.id}
                             value={String(category.id)}
@@ -150,7 +154,7 @@ const fileteredCategories = categories.filter(
                         >
                           <CalendarIcon />
                           {field.value && typeof field.value === "string" ? (
-                            format(new Date(field.value), "PPP")
+                            format(parseDateOnly(field.value), "PPP")
                           ) : (
                             <span>Pick a date</span>
                           )}
@@ -161,12 +165,10 @@ const fileteredCategories = categories.filter(
                           mode="single"
                           selected={
                             field.value && typeof field.value === "string"
-                              ? new Date(field.value)
+                              ? parseDateOnly(field.value)
                               : undefined
                           }
-                          onSelect={(date) =>
-                            field.onChange(date?.toISOString())
-                          }
+                          onSelect={(date) => field.onChange(date ? formatDateOnly(date) : "")}
                           disabled={{
                             after: new Date(),
                           }}
@@ -191,6 +193,7 @@ const fileteredCategories = categories.filter(
                       {...field}
                       value={String(field.value || "")}
                       type="number"
+                      placeholder="0"
                     />
                   </FormControl>
                   <FormMessage />

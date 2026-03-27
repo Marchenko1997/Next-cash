@@ -7,6 +7,7 @@ import { toast } from "sonner";
 import z from "zod";
 import { createTransaction } from "./actions";
 import { useRouter } from "next/navigation";
+import { getDateParts } from "@/lib/date-only";
 
 type Props = {
   categories: Category[];
@@ -18,7 +19,7 @@ const NewTransactionForm = ({ categories }: Props) => {
   const handleSubmit = async (data: z.input<typeof transactionFormSchema>) => {
     const result = await createTransaction({
       amount: Number(data.amount),
-      transactionDate: new Date(data.transactionDate as string),
+      transactionDate: data.transactionDate,
       description: data.description,
       categoryId: Number(data.categoryId),
     });
@@ -28,10 +29,9 @@ const NewTransactionForm = ({ categories }: Props) => {
       return;
     }
 
+    const { month, year } = getDateParts(data.transactionDate);
     toast.success("Transaction created successfully");
-    router.push(
-      `/dashboard/transactions?month=${new Date(data.transactionDate as string).getMonth() + 1}&year=${new Date(data.transactionDate as string).getFullYear()}`,
-    );
+    router.push(`/dashboard/transactions?month=${month}&year=${year}`);
   };
   return <TransactionForm categories={categories} onSubmit={handleSubmit} />;
 };

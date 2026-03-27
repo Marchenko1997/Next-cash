@@ -17,7 +17,7 @@ const Cashflow = async ({ year }: { year: number }) => {
           <CashflowFilters yearsRange={yearsRange} year={year} />
         </CardTitle>
       </CardHeader>
-      <CardContent className="grid grid-cols-[1fr_250px]">
+      <CardContent className="grid grid-cols-1 md:grid-cols-[1fr_250px]">
         <CashflowContent annualCashflow={cashflow} />
       </CardContent>
     </Card>

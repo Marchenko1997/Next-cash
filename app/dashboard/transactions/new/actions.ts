@@ -4,11 +4,12 @@ import db from "@/db";
 import { transactionsTable } from "@/db/schema";
 import { auth } from "@clerk/nextjs/server";
 import { transactionSchema } from "@/validation/transactionSchema";
+import { logServerError } from "@/lib/server-error";
 
 export const createTransaction = async (data: {
   amount: number;
   description: string;
-  transactionDate: Date;
+  transactionDate: string;
   categoryId: number;
 }) => {
   const { userId } = await auth();
@@ -27,18 +28,31 @@ export const createTransaction = async (data: {
     };
   }
 
-  const [transaction] = await db
-    .insert(transactionsTable)
-    .values({
-      userId,
-      amount: String(data.amount),
-      description: data.description,
-      transactionDate: data.transactionDate.toISOString(),
-      categoryId: data.categoryId,
-    })
-    .returning();
+  try {
+    const [transaction] = await db
+      .insert(transactionsTable)
+      .values({
+        userId,
+        amount: String(data.amount),
+        description: data.description,
+        transactionDate: data.transactionDate,
+        categoryId: data.categoryId,
+      })
+      .returning({ id: transactionsTable.id });
 
-  return {
-    id: transaction.id,
-  };
+    return {
+      error: false,
+      id: transaction.id,
+    };
+  } catch (error) {
+    logServerError("createTransaction", error, {
+      categoryId: data.categoryId,
+      userId,
+    });
+
+    return {
+      error: true,
+      message: "Failed to create transaction",
+    };
+  }
 };

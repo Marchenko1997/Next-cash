@@ -25,7 +25,7 @@ const poppins = Poppins({
 
 export const metadata: Metadata = {
   title: "NextCash",
-  description: "Finance dashboard",
+  description: "NextCash - Track your finances with ease",
 };
 
 export default function RootLayout({
